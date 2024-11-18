@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>금호고 양심우산 대여 기록일지</title>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #ddd;
+            --container-background: #f9f9f9;
+            --input-background: #ffffff;
+            --input-text-color: #000000;
+            --button-background: #007bff;
+            --button-text-color: #ffffff;
+            --button-border-color: #007bff;
+        }
+
+        [data-theme="dark"] {
+            --background-color: #121212;
+            --text-color: #ffffff;
+            --border-color: #333333;
+            --container-background: #1e1e1e;
+            --input-background: #2c2c2c;
+            --input-text-color: #ffffff;
+            --button-background: #333333;
+            --button-text-color: #ffffff;
+            --button-border-color: #444444;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--container-background);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+
+        textarea, select {
+            width: 13%;
+            font-size: 1em;
+            background-color: var(--input-background);
+            color: var(--input-text-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: -5px;
+            padding: 10x;
+            border-radius: 5px;
+        }
+
+        textarea {
+            height: 1rem; 
+            resize: none; 
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: var(--container-background);
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .btn, .mode-toggle {
+            margin: 5px;
+            padding: 10px;
+            background-color: var(--button-background);
+            color: var(--button-text-color);
+            border: 1px solid var(--button-border-color);
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>금호고 양심우산 대여 기록일지</h1>
+        <p class="warning">양심우산 대여 시 필히 이곳에 학번 및 성함을 남겨주십시오.</p>
+        <button class="mode-toggle" onclick="toggleMode()">모드 전환</button>
+        <form id="postForm">
+            <label for="grade">학년:</label>
+            <select id="grade" name="grade">
+                <option value="1">1학년</option>
+                <option value="2">2학년</option>
+                <option value="3">3학년</option>
+            </select>
+            <label for="class">반:</label>
+            <select id="class" name="class">
+                <option value="1">1반</option>
+                <option value="2">2반</option>
+                <option value="3">3반</option>
+                <option value="4">4반</option>
+                <option value="5">5반</option>
+                <option value="6">6반</option>
+                <option value="7">7반</option>
+                <option value="8">8반</option>
+                <option value="9">9반</option>
+            </select>
+            <label for="content">이름:</label>
+            <textarea id="content" name="content" required></textarea>
+            <button type="submit" class="btn">글 작성</button>
+        </form>
+        <hr>
+        <h2>작성된 글</h2>
+        <ul id="posts"></ul>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyC7bISCqsQQunV0xal-GT38jMRPEdfYG3o",
+  authDomain: "peropero2123-8c936.firebaseapp.com",
+  databaseURL: "https://peropero2123-8c936-default-rtdb.firebaseio.com",
+  projectId: "peropero2123-8c936",
+  storageBucket: "peropero2123-8c936.firebasestorage.app",
+  messagingSenderId: "808652260290",
+  appId: "1:808652260290:web:7ee56fda70778774300c5b",
+  measurementId: "G-2NDNK0VHP9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+
+        function toggleMode() {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme) {
+                document.documentElement.setAttribute("data-theme", savedTheme);
+            }
+            loadPosts();
+        });
+
+        function addPost(grade, classNum, name) {
+            const newPostKey = database.ref().child('posts').push().key;
+            database.ref('posts/' + newPostKey).set({
+                grade: grade,
+                class: classNum,
+                name: name
+            });
+        }
+
+        document.getElementById('postForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const grade = document.getElementById('grade').value;
+            const classNum = document.getElementById('class').value;
+            const name = document.getElementById('content').value;
+
+            addPost(grade, classNum, name);
+            document.getElementById('postForm').reset();
+        });
+
+        function loadPosts() {
+            const postsRef = database.ref('posts');
+            postsRef.on('value', function (snapshot) {
+                const postsList = document.getElementById('posts');
+                postsList.innerHTML = '';
+                snapshot.forEach(function (childSnapshot) {
+                    const postData = childSnapshot.val();
+                    postData.id = childSnapshot.key;
+                    displayPost(postData);
+                });
+            });
+        }
+
+        function displayPost(postData) {
+            const postList = document.getElementById('posts');
+            const li = document.createElement('li');
+
+            li.innerHTML = `<strong>${postData.grade}학년 ${postData.class}반</strong>: ${postData.name}`;
+            li.addEventListener('click', function () {
+                li.style.textDecoration = li.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+            });
+
+            postList.prepend(li);
+        }
+    </script>
+</body>
+</html>
