@@ -1,4 +1,4 @@
-    var firebaseConfig = {
+ }   var firebaseConfig = {
             apiKey: "AIzaSyC7bISCqsQQunV0xal-GT38jMRPEdfYG3o",
   authDomain: "peropero2123-8c936.firebaseapp.com",
   databaseURL: "https://peropero2123-8c936-default-rtdb.firebaseio.com",
